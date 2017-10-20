@@ -22,12 +22,18 @@ class FilterUsername(BaseFilter):
     def filter(self, message):
         return username in message.text
 filter_username = FilterUsername()
+
+def addrmpoint(bot, update):
+    try:
+        f = open('channel.txt', 'w')
+    except IOError:
+        print(channel, ' does not exist, creating.')
+        f = open('channel.txt', 'w+')
     
-def respond(bot, update):
     bot.send_message(chat_id = update.message.chat_id, text = response)
 
 response_handler = MessageHandler(filter_username, respond)
-dispatcher.add_handler(response_handler)
+dispatcher.add_handler(CommandHandler('', addrmpoint))
 
 updater.start_polling()
 updater.idle()
