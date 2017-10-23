@@ -19,33 +19,41 @@ dispatcher = updater.dispatcher
 username = config.get('telegram', 'username')
 
 def editdb(bot, update):
-    connfile = 'db/' + update.message.chat_id + '.db'
+    connfile = 'db/' + str(update.message.chat_id) + '.db'
     conn = sqlite3.connect(connfile)
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS points (username TEXT PRIMARY KEY, adds INT, rms INT, total INT)''')
     entities = update.message.parse_entities()
     usernames = []
     for e in entities.keys():
-        if e == 'mention':
+        if e.type == 'mention':
             usernames.append(entities[e])
-        if e == 'text_mention':
+        if e.type == 'text_mention':
             response = "I'm not touching " + entities[e] + "'s points, ya turkey, that goober needs a username!"
             bot.send_message(chat_id = update.message.chat_id, text = response)
-            
+
+    if usernames.empty():
+        bot.send_message(chat_id = update.message.chat_id, text = 'No username(s) sent.')
     for u in usernames:
-        cursor.execute("""SELECT adds, rms, total FROM points WHERE username = %s""", (u, ))
+        cursor.execute("""SELECT adds, rms, total FROM points WHERE username = ?""", (u, ))
         points = cursor.fetchone()
+        if points is None:
+            points = [0, 0, 0]
         adds = points[0]
         rms = points[1]
         total = points[2]
-        if entities['bot_command'] == 'addpoint':        
-            adds = adds + 1
-        if entities['bot_command'] == 'rmpoint':
-            rms = rms + 1
-        total = adds + rms
-        cursor.execute("""UPDATE points SET adds = %d, total = %d WHERE username = %s""", (adds, total, u))
-        cursor.commit()
-        response = u + ' - ' + '+' + adds + '/-' + rms + ' total: ' + total
+        for e in entities.keys():
+            if e.type == 'bot_command':
+                if entities[e] == '/addpoint':        
+                    adds = adds + 1
+                    break
+                if entities[e] == '/rmpoint':
+                    rms = rms + 1
+                    break
+        total = adds - rms
+        cursor.execute("""REPLACE INTO points (username, adds, rms, total) VALUES (?, ?, ?, ?)""", (u, adds, rms, total))
+        conn.commit()
+        response = u + ' - ' + '+' + str(adds) + '/-' + str(rms) + ' total: ' + str(total)
         bot.send_message(chat_id = update.message.chat_id, text = response)
 
     cursor.close()
