@@ -10,7 +10,7 @@ try:
         sample_config = f.read()
         config = ConfigParser.RawConfigParser(allow_no_value=True)
         config.readfp(io.BytesIO(sample_config))
-except FileNotFoundError:
+except:
     print('Could not find a config file.')
 
 # Main        
