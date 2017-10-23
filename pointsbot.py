@@ -12,7 +12,6 @@ try:
         config.readfp(io.BytesIO(sample_config))
 except:
     print('Could not find a config file.')
-    return 1
 
 # Main        
 updater = Updater(token = config.get('telegram', 'token'))
