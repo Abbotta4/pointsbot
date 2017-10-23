@@ -32,7 +32,7 @@ def editdb(bot, update):
             response = "I'm not touching " + entities[e] + "'s points, ya turkey, that goober needs a username!"
             bot.send_message(chat_id = update.message.chat_id, text = response)
 
-    if usernames.empty():
+    if not usernames:
         bot.send_message(chat_id = update.message.chat_id, text = 'No username(s) sent.')
     for u in usernames:
         cursor.execute("""SELECT adds, rms, total FROM points WHERE username = ?""", (u, ))
