@@ -12,6 +12,7 @@ try:
         config.readfp(io.BytesIO(sample_config))
 except:
     print('Could not find a config file.')
+    return 1
 
 # Main        
 updater = Updater(token = config.get('telegram', 'token'))
@@ -26,35 +27,38 @@ def editdb(bot, update):
     entities = update.message.parse_entities()
     usernames = []
     for e in entities.keys():
-        if e.type == 'mention':
+        if e.type == 'mention' and entities[e].lower() not in [x.lower() for x in usernames]:
             usernames.append(entities[e])
         if e.type == 'text_mention':
             response = "I'm not touching " + entities[e] + "'s points, ya turkey, that goober needs a username!"
             bot.send_message(chat_id = update.message.chat_id, text = response)
-
+            usernames.append(None)
+            
     if not usernames:
         bot.send_message(chat_id = update.message.chat_id, text = 'No username(s) sent.')
+
     for u in usernames:
-        cursor.execute("""SELECT adds, rms, total FROM points WHERE username = ?""", (u, ))
-        points = cursor.fetchone()
-        if points is None:
-            points = [0, 0, 0]
-        adds = points[0]
-        rms = points[1]
-        total = points[2]
-        for e in entities.keys():
-            if e.type == 'bot_command':
-                if '/addpoint' in entities[e]:
-                    adds = adds + 1
-                    break
-                if '/rmpoint' in entities[e]:
-                    rms = rms + 1
-                    break
-        total = adds - rms
-        cursor.execute("""REPLACE INTO points (username, adds, rms, total) VALUES (?, ?, ?, ?)""", (u, adds, rms, total))
-        conn.commit()
-        response = u + ' - ' + '+' + str(adds) + '/-' + str(rms) + ' total: ' + str(total)
-        bot.send_message(chat_id = update.message.chat_id, text = response)
+        if u is not None:
+            cursor.execute("""SELECT adds, rms, total FROM points WHERE username = ?""", (u.lower(), ))
+            points = cursor.fetchone()
+            if points is None:
+                points = [0, 0, 0]
+            adds = points[0]
+            rms = points[1]
+            total = points[2]
+            for e in entities.keys():
+                if e.type == 'bot_command':
+                    if '/addpoint' in entities[e]:
+                        adds = adds + 1
+                        break
+                    if '/rmpoint' in entities[e]:
+                        rms = rms + 1
+                        break
+            total = adds - rms
+            cursor.execute("""REPLACE INTO points (username, adds, rms, total) VALUES (?, ?, ?, ?)""", (u.lower(), adds, rms, total))
+            conn.commit()
+            response = u + ' - ' + '+' + str(adds) + '/-' + str(rms) + ' total: ' + str(total)
+            bot.send_message(chat_id = update.message.chat_id, text = response)
 
     cursor.close()
 
