@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-import logging,ConfigParser,io
+import logging,ConfigParser,io,sqlite3
 from telegram.ext import Updater,MessageHandler,CommandHandler,Filters,BaseFilter
 
 logging.basicConfig(format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s', level = logging.INFO)
@@ -23,17 +23,21 @@ class FilterUsername(BaseFilter):
         return username in message.text
 filter_username = FilterUsername()
 
-def addrmpoint(bot, update):
-    try:
-        f = open('channel.txt', 'w')
-    except IOError:
-        print(channel, ' does not exist, creating.')
-        f = open('channel.txt', 'w+')
+def addpoint(bot, update):
+    connfile = update.message.chat_id + '.db'
+    conn = sqlite3.connect(connfile)
+    cursor = conn.cursor()
+    if cursor.execute("""SELECT name FROM sqlite_master WHERE type='table'""").fetchall().empty():
+        pass #create table
     
+
+def rmpoint(bot, update):
+    pass
     bot.send_message(chat_id = update.message.chat_id, text = response)
 
 response_handler = MessageHandler(filter_username, respond)
-dispatcher.add_handler(CommandHandler('', addrmpoint))
+dispatcher.add_handler(CommandHandler('addpoint', addpoint))
+dispatcher.add_handler(CommandHandler('rmpoint', rmpoint))
 
 updater.start_polling()
 updater.idle()
