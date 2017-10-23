@@ -44,10 +44,10 @@ def editdb(bot, update):
         total = points[2]
         for e in entities.keys():
             if e.type == 'bot_command':
-                if entities[e] == '/addpoint':        
+                if '/addpoint' in entities[e]:
                     adds = adds + 1
                     break
-                if entities[e] == '/rmpoint':
+                if '/rmpoint' in entities[e]:
                     rms = rms + 1
                     break
         total = adds - rms
