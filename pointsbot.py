@@ -81,6 +81,7 @@ def top10(bot, update):
             
                     
 dispatcher.add_handler(CommandHandler(['addpoint', 'rmpoint'], addrmpoint))
+dispatcher.add_handler(CommandHandler(['top10'], top10))
 
 updater.start_polling()
 updater.idle()
