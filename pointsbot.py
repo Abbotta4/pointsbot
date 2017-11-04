@@ -67,6 +67,19 @@ def addrmpoint(bot, update):
                 response = u + ' - ' + '+' + str(adds) + '/-' + str(rms) + ' total: ' + str(total)
                 bot.send_message(chat_id = update.message.chat_id, text = response)
 
+def top10(bot, update):
+    with db_cursor(update) as cursor:
+        cursor.execute('''SELECT * FROM points ORDER BY total ASC''')
+        points = cursor.fetchall()
+        top10 = []
+        while points and len(top10) < 10:
+            top10.append(points.pop())
+        response = ''
+        for username, x in zip(top10, range (1, 10)):
+            response = response + x + '. ' + username[0] + ' - ' + '+' + str(username[1]) + '/-' + str(username[2]) + ' total: ' + str(username[3] + '\n')
+        bot.send_message(chat_id = update.message.chat_id, text = response)
+            
+                    
 dispatcher.add_handler(CommandHandler(['addpoint', 'rmpoint'], addrmpoint))
 
 updater.start_polling()
