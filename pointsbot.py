@@ -18,7 +18,7 @@ updater = Updater(token = config.get('telegram', 'token'))
 dispatcher = updater.dispatcher
 username = config.get('telegram', 'username')
 
-class db_cursor:
+class db_cursor(update):
     def __enter__(self):
         connfile = 'db/' + str(update.message.chat_id) + '.db'
         conn = sqlite3.connect(connfile)
@@ -30,7 +30,7 @@ class db_cursor:
         cursor.close()
 
 def addrmpoint(bot, update):
-    with db_cursor() as cursor:
+    with db_cursor(update) as cursor:
         entities = update.message.parse_entities()
         usernames = []
         for e in entities.keys():
