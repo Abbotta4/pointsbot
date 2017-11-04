@@ -76,7 +76,7 @@ def top10(bot, update):
             top10.append(points.pop())
         response = ''
         for username, x in zip(top10, range (1, 10)):
-            response = response + x + '. ' + username[0] + ' - ' + '+' + str(username[1]) + '/-' + str(username[2]) + ' total: ' + str(username[3] + '\n')
+            response = response + str(x) + '. ' + username[0] + ' - ' + '+' + str(username[1]) + '/-' + str(username[2]) + ' total: ' + str(username[3]) + '\n'
         bot.send_message(chat_id = update.message.chat_id, text = response)
             
                     
