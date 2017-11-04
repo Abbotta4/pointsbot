@@ -18,16 +18,18 @@ updater = Updater(token = config.get('telegram', 'token'))
 dispatcher = updater.dispatcher
 username = config.get('telegram', 'username')
 
-class db_cursor(update):
+class db_cursor:
+    def __init__(self, update):
+          self.update = update
     def __enter__(self):
-        connfile = 'db/' + str(update.message.chat_id) + '.db'
-        conn = sqlite3.connect(connfile)
-        cursor = conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS points (username TEXT PRIMARY KEY, adds INT, rms INT, total INT)''')
-        return cursor
+        self.connfile = 'db/' + str(self.update.message.chat_id) + '.db'
+        self.conn = sqlite3.connect(self.connfile)
+        self.cursor = self.conn.cursor()
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS points (username TEXT PRIMARY KEY, adds INT, rms INT, total INT)''')
+        return self.cursor
     def __exit__(self, type, value, traceback):
-        conn.commit()
-        cursor.close()
+        self.conn.commit()
+        self.cursor.close()
 
 def addrmpoint(bot, update):
     with db_cursor(update) as cursor:
@@ -52,7 +54,7 @@ def addrmpoint(bot, update):
                     points = [0, 0, 0]
                 adds = points[0]
                 rms = points[1]
-                if message.text.startswith('/add'):
+                if update.message.text.startswith('/add'):
                     adds = adds + 1
                 else: #message.text.startswith('/rm'):
                     rms = rms + 1
