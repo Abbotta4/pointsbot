@@ -30,7 +30,7 @@ class db_cursor:
         cursor.close()
 
 def addrmpoint(bot, update):
-    with db_open() as cursor:
+    with db_cursor() as cursor:
         entities = update.message.parse_entities()
         usernames = []
         for e in entities.keys():
