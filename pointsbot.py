@@ -13,7 +13,7 @@ try:
 except:
     print('Could not find a config file.')
 
-# Main        
+# Main
 updater = Updater(token = config.get('telegram', 'token'))
 dispatcher = updater.dispatcher
 username = config.get('telegram', 'username')
@@ -75,11 +75,10 @@ def top10(bot, update):
         while points and len(top10) < 10:
             top10.append(points.pop())
         response = ''
-        for username, x in zip(top10, range (1, 10)):
+        for username, x in zip(top10, range (1, 11)):
             response = response + str(x) + '. ' + username[0] + ' - ' + '+' + str(username[1]) + '/-' + str(username[2]) + ' total: ' + str(username[3]) + '\n'
         bot.send_message(chat_id = update.message.chat_id, text = response)
-            
-                    
+
 dispatcher.add_handler(CommandHandler(['addpoint', 'rmpoint'], addrmpoint))
 dispatcher.add_handler(CommandHandler(['top10'], top10))
 
