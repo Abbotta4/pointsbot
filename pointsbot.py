@@ -45,7 +45,8 @@ def addrmpoint(bot, update):
 
         if update.message.reply_to_message:
             reply_user = '@' + update.message.reply_to_message.from_user.username
-            usernames.append(reply_user)
+            if reply_user.lower() not in [x.lower() for x in usernames]:
+                usernames.append(reply_user)
 
         if not usernames:
             bot.send_message(chat_id = update.message.chat_id, text = 'No username(s) sent.')
