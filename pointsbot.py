@@ -162,9 +162,9 @@ def votepoint(bot, update, job_queue):
                 reply_markup = InlineKeyboardMarkup(button_list)
                 votemessage = bot.send_message(chat_id = update.message.chat_id, text = "Should " + u + " gain or lose a point? 5m00s", reply_markup = reply_markup)
 
-                counter = 30
+                counter = 300
                 job_second = job_queue.run_repeating(callback_countdown, interval=15, context=[votemessage, counter], name='countdown')
-                job_finish = job_queue.run_once(callback_finish, 30, context=[votemessage, job_second], name='countdown removal')
+                job_finish = job_queue.run_once(callback_finish, 300, context=[votemessage, job_second], name='countdown removal')
         else:
             bot.send_message(chat_id = update.message.chat_id, text = 'Cannot vote on more than one user at once')
                         
