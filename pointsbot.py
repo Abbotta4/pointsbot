@@ -114,7 +114,7 @@ def votepoint(bot, update, job_queue):
             votes = v_cursor.fetchone()
             button_list = [[InlineKeyboardButton("add " + str(votes[0]), callback_data='add'), InlineKeyboardButton("rm " + str(votes[1]), callback_data='rm')]]
             reply_markup = InlineKeyboardMarkup(button_list)
-            job.context[0].edit_text(text="Should this be add or rm? {}".format(str(job.context[1]//60) + "m" + str(job.context[1]%60) + "s"), reply_markup = reply_markup)
+            job.context[0].edit_text(text="Should " + u + " gain or lose a point? {}".format(str((job.context[1]//60)).zfill(2) + "m" + str((job.context[1]%60)).zfill(2) + "s"), reply_markup = reply_markup)
 
     def callback_finish(bot, job):
         with vote_cursor(update) as v_cursor, db_cursor(update.message) as cursor:
@@ -160,7 +160,7 @@ def votepoint(bot, update, job_queue):
                 rms = points[1]
                 button_list = [[InlineKeyboardButton("add 0", callback_data='add'), InlineKeyboardButton("rm 0", callback_data='rm')]]
                 reply_markup = InlineKeyboardMarkup(button_list)
-                votemessage = bot.send_message(chat_id = update.message.chat_id, text = "Should " + u + " gain or lose a point? 5m00s", reply_markup = reply_markup)
+                votemessage = bot.send_message(chat_id = update.message.chat_id, text = "Should " + u + " gain or lose a point? 05m00s", reply_markup = reply_markup)
 
                 counter = 300
                 job_second = job_queue.run_repeating(callback_countdown, interval=15, context=[votemessage, counter], name='countdown')
