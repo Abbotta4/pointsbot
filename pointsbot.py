@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-import logging,ConfigParser,io,sqlite3,time,os
+import logging,ConfigParser,io,sqlite3,time,os,datetime
 from telegram.ext import Updater,CommandHandler,CallbackQueryHandler
 from telegram import InlineKeyboardButton,InlineKeyboardMarkup
 from telegram.error import BadRequest
@@ -29,6 +29,7 @@ class db_cursor:
         self.conn = sqlite3.connect(self.connfile)
         self.cursor = self.conn.cursor()
         self.cursor.execute('''CREATE TABLE IF NOT EXISTS points (username TEXT PRIMARY KEY, adds INT, rms INT, total INT)''')
+        self.cursor.execute('''CREATE TABLE IF NOT EXISTS reset_date (date INT PRIMARY KEY)''')
         return self.cursor
     def __exit__(self, type, value, traceback):
         self.conn.commit()
@@ -105,6 +106,22 @@ def top10(bot, update):
             response = response + str(x) + '. ' + username[0] + ' - ' + '+' + str(username[1]) + '/-' + str(username[2]) + ' total: ' + str(username[3]) + '\n'
         bot.send_message(chat_id = update.message.chat_id, text = response)
 
+@run_async
+def reset(bot, update):
+    with db_cursor(update.message) as cursor:
+        cursor.execute('''SELECT date FROM reset_date''')
+        reset_date = cursor.fetchone()
+        if reset_date < time.time():
+            cursor.execute('''DELETE FROM points''')
+            cursor.execute('''DELETE FROM reset_date''')
+            new_date = time.time() + 7776000
+            cursor.execute('''INSERT INTO reset_date (date) VALUES (?)''', (new_date, ))
+            response = 'Database reset. Can not be reset again until ' + datetime.datetime.fromtimestamp(new_date).strftime('%Y-%m-%d %H:%M:%S')
+            bot.send_message(chat_id = update.message.chat_id, text = response)
+        else:
+            response = 'Can not reset until ' + datetime.datetime.fromtimestamp(reset_date[0]).strftime('%Y-%m-%d %H:%M:%S')
+            bot.send_message(chat_id = update.message.chat_id, text = response)
+        
 @run_async
 def votepoint(bot, update, job_queue):
     def callback_countdown(bot, job):
@@ -192,6 +209,7 @@ def button(bot, update):
 dispatcher.add_handler(CommandHandler(['addpoint', 'rmpoint'], addrmpoint))
 dispatcher.add_handler(CommandHandler(['top10'], top10))
 dispatcher.add_handler(CommandHandler(['votepoint'], votepoint, pass_job_queue=True))
+dispatcher.add_handler(CommandHandler(['reset_points_database'], reset))
 dispatcher.add_handler(CallbackQueryHandler(button))
 
 updater.start_polling()
