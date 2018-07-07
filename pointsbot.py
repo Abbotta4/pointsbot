@@ -121,7 +121,15 @@ def reset(bot, update):
         else:
             response = 'Can not reset until ' + datetime.datetime.fromtimestamp(reset_date[0]).strftime('%Y-%m-%d %H:%M:%S')
             bot.send_message(chat_id = update.message.chat_id, text = response)
-        
+
+@run_async
+def user_reset(bot, update):
+    with db_cursor(update.message) as cursor:
+        u = '@' + update.message.from_user.username
+        cursor.execute('''DELETE FROM points WHERE username = ?''', (u.lower(), ))
+        response = 'Points reset for ' + u
+        bot.send_message(chat_id = update.message.chat_id, text = response)
+
 @run_async
 def votepoint(bot, update, job_queue):
     def callback_countdown(bot, job):
@@ -210,6 +218,7 @@ dispatcher.add_handler(CommandHandler(['addpoint', 'rmpoint'], addrmpoint))
 dispatcher.add_handler(CommandHandler(['top10'], top10))
 dispatcher.add_handler(CommandHandler(['votepoint'], votepoint, pass_job_queue=True))
 dispatcher.add_handler(CommandHandler(['reset_points_database'], reset))
+dispatcher.add_handler(CommandHandler(['reset_my_points'], user_reset))
 dispatcher.add_handler(CallbackQueryHandler(button))
 
 updater.start_polling()
