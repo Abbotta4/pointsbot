@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-import logging,ConfigParser,io,sqlite3,time,os,datetime
+import logging,ConfigParser,io,sqlite3,time,os,datetime,random
 from telegram.ext import Updater,CommandHandler,CallbackQueryHandler
 from telegram import InlineKeyboardButton,InlineKeyboardMarkup
 from telegram.error import BadRequest
@@ -78,22 +78,23 @@ def addrmpoint(bot, update):
 
         for u in usernames:
             if u is not None:
-                cursor.execute("""SELECT adds, rms FROM points WHERE username = ?""", (u.lower(), ))
-                points = cursor.fetchone()
+                cursor.execute("""SELECT adds, rms, total FROM points WHERE username = ?""", (u.lower(), ))
+                points = list(cursor.fetchone())
                 if points is None:
                     points = [0, 0, 0]
-                adds = points[0]
-                rms = points[1]
                 if update.message.text.startswith('/add'):
-                    adds = adds + 1
+                    points[0] = points[0] + 1
                 elif update.message.text.startswith('/rm'):
-                    rms = rms + 1
-                else: # upate.message.text.startswith('/neutral'):
-                    adds = adds + 1
-                    rms = rms + 1
-                total = adds - rms
-                cursor.execute("""REPLACE INTO points (username, adds, rms, total) VALUES (?, ?, ?, ?)""", (u.lower(), adds, rms, total))
-                response = u + ' - ' + '+' + str(adds) + '/-' + str(rms) + ' total: ' + str(total)
+                    points[1] = points[1] + 1
+                elif update.message.text.startswith('/neutral'):
+                    points[0] = points[0] + 1
+                    points[1] = points[1] + 1
+                else: #update.message.text.startswith('/random'):
+                    index = random.choice([0, 1])
+                    points[index] = points[index] + 1
+                points[2] = points[0] - points[1]
+                cursor.execute("""REPLACE INTO points (username, adds, rms, total) VALUES (?, ?, ?, ?)""", (u.lower(), points[0], points[1], points[2]))
+                response = u + ' - ' + '+' + str(points[0]) + '/-' + str(points[1]) + ' total: ' + str(points[2])
                 bot.send_message(chat_id = update.message.chat_id, text = response)
 
 @run_async
@@ -217,7 +218,7 @@ def button(bot, update):
         print('couldnt see file: db/' + str(query.message.chat_id) + '_' + str(query.message.message_id) + '_vote.db')
             
 
-dispatcher.add_handler(CommandHandler(['addpoint', 'rmpoint', 'neutralpoint'], addrmpoint))
+dispatcher.add_handler(CommandHandler(['addpoint', 'rmpoint', 'neutralpoint', 'randompoint'], addrmpoint))
 dispatcher.add_handler(CommandHandler(['top10'], top10))
 dispatcher.add_handler(CommandHandler(['votepoint'], votepoint, pass_job_queue=True))
 dispatcher.add_handler(CommandHandler(['reset_points_database'], reset))
