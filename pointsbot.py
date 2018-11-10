@@ -79,9 +79,11 @@ def addrmpoint(bot, update):
         for u in usernames:
             if u is not None:
                 cursor.execute("""SELECT adds, rms, total FROM points WHERE username = ?""", (u.lower(), ))
-                points = list(cursor.fetchone())
+                points = cursor.fetchone()
                 if points is None:
                     points = [0, 0, 0]
+                else:
+                    points = list(points)
                 if update.message.text.startswith('/add'):
                     points[0] = points[0] + 1
                 elif update.message.text.startswith('/rm'):
@@ -113,26 +115,17 @@ def top10(bot, update):
 @run_async
 def reset(bot, update):
     with db_cursor(update.message) as cursor:
-        cursor.execute('''SELECT date FROM reset_date''')
-        reset_date = cursor.fetchone()
-        if reset_date < time.time():
+        username = '@' + update.effective_user.username
+        cursor.execute('''SELECT total FROM points WHERE username = ?''', (username.lower(), ))
+        total = cursor.fetchone()[0]
+        if total >= 100:
             cursor.execute('''DELETE FROM points''')
             cursor.execute('''DELETE FROM reset_date''')
             new_date = time.time() + 7776000
             cursor.execute('''INSERT INTO reset_date (date) VALUES (?)''', (new_date, ))
-            response = 'Database reset. Can not be reset again until ' + datetime.datetime.fromtimestamp(new_date).strftime('%Y-%m-%d %H:%M:%S')
-            bot.send_message(chat_id = update.message.chat_id, text = response)
+            bot.send_message(chat_id = update.message.chat_id, text = 'Database reset.')
         else:
-            response = 'Can not reset until ' + datetime.datetime.fromtimestamp(reset_date[0]).strftime('%Y-%m-%d %H:%M:%S')
-            bot.send_message(chat_id = update.message.chat_id, text = response)
-
-@run_async
-def user_reset(bot, update):
-    with db_cursor(update.message) as cursor:
-        u = '@' + update.message.from_user.username
-        cursor.execute('''DELETE FROM points WHERE username = ?''', (u.lower(), ))
-        response = 'Points reset for ' + u
-        bot.send_message(chat_id = update.message.chat_id, text = response)
+            bot.send_message(chat_id = update.message.chat_id, text = 'You must have at least 100 points to reset the database.')
 
 @run_async
 def votepoint(bot, update, job_queue):
@@ -221,8 +214,7 @@ def button(bot, update):
 dispatcher.add_handler(CommandHandler(['addpoint', 'rmpoint', 'neutralpoint', 'randompoint'], addrmpoint))
 dispatcher.add_handler(CommandHandler(['top10'], top10))
 dispatcher.add_handler(CommandHandler(['votepoint'], votepoint, pass_job_queue=True))
-dispatcher.add_handler(CommandHandler(['reset_points_database'], reset))
-dispatcher.add_handler(CommandHandler(['reset_my_points'], user_reset))
+dispatcher.add_handler(CommandHandler(['resetdb'], reset))
 dispatcher.add_handler(CallbackQueryHandler(button))
 
 updater.start_polling()
