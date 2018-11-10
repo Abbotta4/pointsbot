@@ -86,7 +86,10 @@ def addrmpoint(bot, update):
                 rms = points[1]
                 if update.message.text.startswith('/add'):
                     adds = adds + 1
-                else: #message.text.startswith('/rm'):
+                elif update.message.text.startswith('/rm'):
+                    rms = rms + 1
+                else: # upate.message.text.startswith('/neutral'):
+                    adds = adds + 1
                     rms = rms + 1
                 total = adds - rms
                 cursor.execute("""REPLACE INTO points (username, adds, rms, total) VALUES (?, ?, ?, ?)""", (u.lower(), adds, rms, total))
@@ -214,7 +217,7 @@ def button(bot, update):
         print('couldnt see file: db/' + str(query.message.chat_id) + '_' + str(query.message.message_id) + '_vote.db')
             
 
-dispatcher.add_handler(CommandHandler(['addpoint', 'rmpoint'], addrmpoint))
+dispatcher.add_handler(CommandHandler(['addpoint', 'rmpoint', 'neutralpoint'], addrmpoint))
 dispatcher.add_handler(CommandHandler(['top10'], top10))
 dispatcher.add_handler(CommandHandler(['votepoint'], votepoint, pass_job_queue=True))
 dispatcher.add_handler(CommandHandler(['reset_points_database'], reset))
