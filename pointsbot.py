@@ -110,7 +110,8 @@ def top10(bot, update):
         response = ''
         for username, x in zip(top10, range (1, 11)):
             response = response + str(x) + '. ' + username[0] + ' - ' + '+' + str(username[1]) + '/-' + str(username[2]) + ' total: ' + str(username[3]) + '\n'
-        bot.send_message(chat_id = update.message.chat_id, text = response)
+        if (response):
+            bot.send_message(chat_id = update.message.chat_id, text = response)
 
 @run_async
 def reset(bot, update):
