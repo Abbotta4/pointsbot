@@ -71,31 +71,36 @@ def get_users(bot, update, cursor):
 def addrmpoint(bot, update):
     with db_cursor(update.message) as cursor:
         usernames = get_users(bot, update, cursor)
+        update_user = '@' + update.effective_user.username
         if not usernames:
             bot.send_message(chat_id = update.message.chat_id, text = 'No username(s) sent.')
 
         for u in usernames:
-            if u is not None:
-                cursor.execute("""SELECT adds, rms, total FROM points WHERE username = ?""", (u.lower(), ))
-                points = cursor.fetchone()
-                if points is None:
-                    points = [0, 0, 0]
-                else:
-                    points = list(points)
-                if update.message.text.startswith('/add'):
-                    points[0] = points[0] + 1
-                elif update.message.text.startswith('/rm'):
-                    points[1] = points[1] + 1
-                elif update.message.text.startswith('/neutral'):
-                    points[0] = points[0] + 1
-                    points[1] = points[1] + 1
-                else: #update.message.text.startswith('/random'):
-                    index = random.choice([0, 1])
-                    points[index] = points[index] + 1
-                points[2] = points[0] - points[1]
-                cursor.execute("""REPLACE INTO points (username, adds, rms, total) VALUES (?, ?, ?, ?)""", (u.lower(), points[0], points[1], points[2]))
-                response = u + ' - ' + '+' + str(points[0]) + '/-' + str(points[1]) + ' total: ' + str(points[2])
-                bot.send_message(chat_id = update.message.chat_id, text = response)
+            if u is None:
+                return
+            if u == update_user:
+                bot.send_message(chat_id = update.message.chat_id, text = 'You can\'t change your own points, narcissist.')
+                return
+            cursor.execute("""SELECT adds, rms, total FROM points WHERE username = ?""", (u.lower(), ))
+            points = cursor.fetchone()
+            if points is None:
+                points = [0, 0, 0]
+            else:
+                points = list(points)
+            if update.message.text.startswith('/add'):
+                points[0] = points[0] + 1
+            elif update.message.text.startswith('/rm'):
+                points[1] = points[1] + 1
+            elif update.message.text.startswith('/neutral'):
+                points[0] = points[0] + 1
+                points[1] = points[1] + 1
+            else: #update.message.text.startswith('/random'):
+                index = random.choice([0, 1])
+                points[index] = points[index] + 1
+            points[2] = points[0] - points[1]
+            cursor.execute("""REPLACE INTO points (username, adds, rms, total) VALUES (?, ?, ?, ?)""", (u.lower(), points[0], points[1], points[2]))
+            response = u + ' - ' + '+' + str(points[0]) + '/-' + str(points[1]) + ' total: ' + str(points[2])
+            bot.send_message(chat_id = update.message.chat_id, text = response)
 
 @run_async
 def top10(bot, update):
