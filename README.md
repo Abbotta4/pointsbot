@@ -5,4 +5,5 @@ Pointsbot uses PostgreSQL to maintain databases of points for each of the chats 
 Required python module:
 ```
 python-telegram-bot
+configparser
 ```

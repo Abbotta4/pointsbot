@@ -16,3 +16,5 @@ logs/
 *.ini
 !example.ini
 pyvenv.cfg
+.bash_history
+.cache/
