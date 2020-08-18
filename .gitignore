@@ -8,10 +8,11 @@ test.py
 bin/
 include/
 lib/
+lib64
 local/
 share/
 pip-selfcheck.json
 logs/
 *.ini
 !example.ini
-
+pyvenv.cfg

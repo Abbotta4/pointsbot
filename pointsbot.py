@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-import logging,ConfigParser,io,sqlite3,time,os,datetime,random
+import logging,configparser,io,sqlite3,time,os,datetime,random
 from telegram.ext import Updater,CommandHandler,CallbackQueryHandler
 from telegram import InlineKeyboardButton,InlineKeyboardMarkup
 from telegram.error import BadRequest
@@ -9,15 +9,13 @@ logging.basicConfig(format = '%(asctime)s - %(name)s - %(levelname)s - %(message
 
 # Load the configuration file
 try:
-    with open("config.ini") as f:
-        sample_config = f.read()
-        config = ConfigParser.RawConfigParser(allow_no_value=True)
-        config.readfp(io.BytesIO(sample_config))
-except:
-    print('Could not find a config file.')
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+except Exception as e:
+    print('Could not find config.ini: %s' % e)
 
 # Main
-updater = Updater(token = config.get('telegram', 'token'))
+updater = Updater(token = config.get('telegram', 'token'), use_context=False)
 dispatcher = updater.dispatcher
 username = config.get('telegram', 'username')
 
