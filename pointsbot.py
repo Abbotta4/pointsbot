@@ -17,7 +17,6 @@ except Exception as e:
 # Main
 updater = Updater(token = config.get('telegram', 'token'), use_context=False)
 dispatcher = updater.dispatcher
-username = config.get('telegram', 'username')
 
 class db_cursor:
     def __init__(self, message):
