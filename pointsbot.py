@@ -62,7 +62,7 @@ def get_users(bot, update, cursor):
 
     if update.message.reply_to_message:
         reply_user = '@' + update.message.reply_to_message.from_user.username
-        if reply_user.lower() not in [x.lower() for x in usernames]:
+        if not usernames:
             usernames.append(reply_user)
 
     return usernames
