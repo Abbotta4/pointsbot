@@ -78,8 +78,8 @@ def addrmpoint(bot, update):
         for u in usernames:
             if u is None:
                 return
-            if u == update_user:
-                bot.send_message(chat_id = update.message.chat_id, text = 'You can\'t change your own points, narcissist.')
+            if u == update_user and update.message.text.startswith('/add'):
+                bot.send_message(chat_id = update.message.chat_id, text = 'You can\'t give yourself points, narcissist.')
                 return
             cursor.execute("""SELECT adds, rms, total FROM points WHERE username = ?""", (u.lower(), ))
             points = cursor.fetchone()
