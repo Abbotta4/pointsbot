@@ -1,0 +1,16 @@
+[Unit]
+Description=Simple python service for pointsbot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pointsbot
+Group=pointsbot
+WorkingDirectory=/opt/pointsbot
+ExecStart=/opt/pointsbot/bin/python -u /opt/pointsbot/pointsbot.py
+StandardOutput=syslog
+StandardError=syslog
+
+[Install]
+WantedBy=multi-user.target
